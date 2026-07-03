@@ -1,84 +1,63 @@
 # Multi-Stage Steel Defect Detection
 
-## Overview
+This project implements a multi-stage pipeline for steel surface defect detection using PyTorch. It includes a binary classifier, a full-image FPN segmentation model, and an ROI-based refinement model. The notebook contains the full training and evaluation workflow.
 
-This repository contains a completed deep learning project for industrial steel surface defect detection. The project uses a multi-stage PyTorch pipeline to detect whether a steel image contains a defect and then localize the defective region with semantic segmentation.
-
-The workflow is implemented in a Jupyter notebook and includes saved experiment outputs, metrics, threshold search results, and prediction visualizations. The goal is accurate defect localization, especially for small and difficult surface defects.
+The project is based on the Severstal steel defect detection dataset. Dataset files and model checkpoints are not included in this repository.
 
 ## Features
 
-- Binary image-level defect classifier
-- Full-image FPN semantic segmentation model
-- ROI-based crop refinement network
+- Binary classifier for defect presence detection
+- Full-image FPN segmentation
+- ROI-based crop refinement
 - Transfer learning with a pretrained ResNet34 encoder
-- Test-Time Augmentation (TTA)
-- Validation-based threshold optimization
+- Test-time augmentation during inference
+- Threshold search on the validation set
 - Connected component filtering
-- Morphological post-processing
-- Saved metrics, summaries, CSV logs, and prediction visualizations
-- Fast review cells for viewing saved results without training
+- Basic morphological post-processing
+- Saved metrics, logs, summaries, and example prediction images
 
 ## Pipeline
 
-The project uses a three-stage inference pipeline:
+The pipeline has three main stages:
 
-| Stage | Component | Purpose |
+| Stage | Model | Description |
 | --- | --- | --- |
-| Stage 0 | Binary classifier | Predicts whether an image contains a defect. |
-| Stage 1 | Full-image FPN segmenter | Produces a coarse defect mask using global image context. |
-| Stage 2 | Crop FPN refiner | Refines the predicted ROI to improve local defect boundaries. |
+| 1 | Binary classifier | Checks whether an image contains a defect. |
+| 2 | Full-image FPN segmentation | Predicts a coarse defect mask using the full image. |
+| 3 | ROI-based crop refinement | Refines the predicted region using a cropped ROI. |
 
-Final predictions combine the coarse full-image mask and the refined crop mask. Small false-positive components are filtered, and light morphological post-processing is applied before evaluation.
-
-```text
-Input image
-    |
-    v
-Binary classifier
-    |
-    v
-Full-image FPN segmentation
-    |
-    v
-ROI extraction
-    |
-    v
-Crop-based FPN refinement
-    |
-    v
-Post-processing and final mask
-```
+The final mask combines the full-image prediction and the crop-refined prediction. Small connected components are filtered before evaluation.
 
 ## Results
 
-The reported results are preserved from the completed experiment.
-
-| Split | Dice | IoU |
+| Metric | Validation | Test |
 | --- | ---: | ---: |
-| Validation | 80.17% | 73.04% |
-| Test | 79.92% | 72.82% |
+| Dice | 80.17% | 79.92% |
+| IoU | 73.04% | 72.82% |
 
-Additional saved summary:
+Average test inference time:
 
 ```text
-Best threshold: 0.6000000000000001
-Best threshold validation Dice: 0.7487
-Test average inference time: 330.19 ms/image
+330.19 ms/image
 ```
+
+## Example Prediction
+
+Example prediction images are saved in `outputs_improved_strongest/visuals/`.
+
+![Example prediction](outputs_improved_strongest/visuals/07c917711_prediction.png)
 
 ## Technologies
 
-| Category | Tools |
-| --- | --- |
-| Language | Python |
-| Deep Learning | PyTorch, TorchVision |
-| Segmentation | Segmentation Models PyTorch |
-| Computer Vision | OpenCV |
-| Augmentation | Albumentations |
-| Data Processing | NumPy, Pandas |
-| Evaluation | Scikit-learn |
-| Experiment Interface | Jupyter Notebook, Matplotlib, tqdm |
+- Python
+- PyTorch
+- Segmentation Models PyTorch
+- OpenCV
+- Albumentations
+- NumPy
+- Pandas
+- Scikit-learn
+- Jupyter Notebook
 
 ## Repository Structure
 
@@ -87,46 +66,23 @@ Test average inference time: 330.19 ms/image
 ├── LICENSE
 ├── README.md
 ├── requirements.txt
-├── severstal_real_notebook_cells_mac_vscode.ipynb
+├── multi_stage_steel_defect_detection.ipynb
 └── outputs_improved_strongest/
     ├── README.md
     ├── final_project_summary.txt
     ├── final_project_summary.json
-    ├── best_threshold.json
-    ├── best_threshold.txt
-    ├── classifier_metrics.json
-    ├── segmenter_metrics.json
-    ├── refiner_metrics.json
-    ├── classifier_history.csv
-    ├── segmenter_history.csv
-    ├── refiner_history.csv
+    ├── *_metrics.json
+    ├── *_history.csv
+    ├── *_summary.json
+    ├── *_per_image_results.csv
     ├── threshold_search.csv
-    ├── val_summary.json
-    ├── test_summary.json
-    ├── val_per_image_results.csv
-    ├── test_per_image_results.csv
     └── visuals/
         └── *_prediction.png
 ```
 
-## Quick Review
-
-If you only want to review the completed results, open:
-
-```text
-outputs_improved_strongest/final_project_summary.txt
-```
-
-The notebook also includes fast review cells near the top:
-
-1. `Quick saved-summary view`
-2. `Quick saved-visuals view`
-
-These cells display saved metrics and prediction images without training or re-running evaluation.
-
 ## Setup
 
-Install the required Python dependencies:
+Install the dependencies:
 
 ```bash
 pip install -r requirements.txt
@@ -138,73 +94,50 @@ Download the Severstal dataset and place it at:
 ~/Downloads/severstal-steel-defect-detection
 ```
 
-Or set a custom dataset path:
+If your dataset is stored somewhere else, set the path before running the notebook:
 
 ```bash
 export SEVERSTAL_BASE_PATH="/path/to/severstal-steel-defect-detection"
 ```
 
-Open the notebook:
+Open and run:
 
 ```text
-severstal_real_notebook_cells_mac_vscode.ipynb
+multi_stage_steel_defect_detection.ipynb
 ```
 
-Run the cells from top to bottom for the full pipeline.
+## Saved Results
 
-## Full Run Behavior
-
-The notebook preserves the trained pipeline behavior:
-
-- If `best_cls.pth`, `best_seg.pth`, and `best_ref.pth` are available under `outputs_improved_strongest/checkpoints/`, the notebook loads them and skips training.
-- If checkpoints are missing and `FORCE_RETRAIN = False`, the notebook trains the missing stages.
-- `RESUME = True` allows interrupted training to continue from the latest checkpoint.
-- The saved threshold in `best_threshold.json` is reused when available.
-
-Checkpoint files are not tracked in Git because they are large. Store trained weights with Git LFS, a GitHub Release, Kaggle, Google Drive, or another artifact store if you want to share them.
-
-## Outputs
-
-The notebook writes generated outputs to:
+For a quick review without training, open:
 
 ```text
-outputs_improved_strongest/
+outputs_improved_strongest/final_project_summary.txt
 ```
 
-This folder includes:
+The notebook also has two quick review cells near the top:
 
-- Final project summaries
-- Per-stage metrics
-- Training history CSV files
-- Threshold search results
-- Validation and test per-image results
-- Saved prediction visualizations
+1. `Quick saved-summary view`
+2. `Quick saved-visuals view`
 
-## Future Improvements
+These cells print the saved summary and display saved prediction images.
 
-- Add experiment configuration files for easier hyperparameter tracking.
-- Provide downloadable model checkpoints through GitHub Releases or external artifact storage.
-- Add a lightweight inference-only script for running predictions outside the notebook.
-- Add automated tests for RLE decoding, mask generation, thresholding, and post-processing utilities.
-- Compare additional encoders such as EfficientNet or ConvNeXt under the same validation protocol.
-- Package the pipeline into reusable Python modules while preserving the notebook as the experiment report.
+## Checkpoints
 
-## Citation
+Model checkpoint files are ignored by Git because they are large:
 
-If you use this project or build on it, please cite the repository:
-
-```bibtex
-@misc{multi_stage_steel_defect_detection,
-  title = {Multi-Stage Steel Defect Detection},
-  author = {Ali},
-  year = {2026},
-  url = {https://github.com/Ali-51/multi-stage-steel-defect-detection}
-}
+```text
+outputs_improved_strongest/checkpoints/
 ```
 
-## Notes
+If the trained checkpoints are available in that folder, the notebook can load them and skip training. If checkpoints are missing, the notebook will train the missing stages.
 
-- Dataset files are not included in this repository.
-- Model checkpoint files are not included in Git.
-- The default encoder is `resnet34`, which works well for limited VRAM.
-- For stronger experiments, try `timm-efficientnet-b3` and reduce `BATCH` if memory is tight.
+## Future Work
+
+- Add a small inference script outside the notebook.
+- Move reusable code into Python modules.
+- Add tests for mask decoding and post-processing.
+- Share trained checkpoints through a release or external storage.
+
+## License
+
+This project is licensed under the MIT License. See `LICENSE` for details.
