@@ -84,6 +84,7 @@ Test average inference time: 330.19 ms/image
 
 ```text
 .
+├── LICENSE
 ├── README.md
 ├── requirements.txt
 ├── severstal_real_notebook_cells_mac_vscode.ipynb
