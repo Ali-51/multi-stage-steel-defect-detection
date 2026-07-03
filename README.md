@@ -1,38 +1,84 @@
-# Severstal Steel Defect Detection
+# Multi-Stage Steel Defect Detection
 
-Jupyter notebook for the Severstal steel defect detection workflow. It trains a classifier, a full-image FPN segmenter, and a crop-based FPN refiner, then evaluates predictions and writes metrics/visual summaries.
+## Overview
 
-The project implements a multi-stage deep learning pipeline for industrial steel surface defect localization using PyTorch and transfer learning.
+This repository contains a completed deep learning project for industrial steel surface defect detection. The project uses a multi-stage PyTorch pipeline to detect whether a steel image contains a defect and then localize the defective region with semantic segmentation.
 
-## Project Highlights
+The workflow is implemented in a Jupyter notebook and includes saved experiment outputs, metrics, threshold search results, and prediction visualizations. The goal is accurate defect localization, especially for small and difficult surface defects.
 
-- Binary image classifier for defect presence detection
+## Features
+
+- Binary image-level defect classifier
 - Full-image FPN semantic segmentation model
 - ROI-based crop refinement network
 - Transfer learning with a pretrained ResNet34 encoder
 - Test-Time Augmentation (TTA)
-- Threshold optimization
+- Validation-based threshold optimization
 - Connected component filtering
 - Morphological post-processing
+- Saved metrics, summaries, CSV logs, and prediction visualizations
+- Fast review cells for viewing saved results without training
+
+## Pipeline
+
+The project uses a three-stage inference pipeline:
+
+| Stage | Component | Purpose |
+| --- | --- | --- |
+| Stage 0 | Binary classifier | Predicts whether an image contains a defect. |
+| Stage 1 | Full-image FPN segmenter | Produces a coarse defect mask using global image context. |
+| Stage 2 | Crop FPN refiner | Refines the predicted ROI to improve local defect boundaries. |
+
+Final predictions combine the coarse full-image mask and the refined crop mask. Small false-positive components are filtered, and light morphological post-processing is applied before evaluation.
+
+```text
+Input image
+    |
+    v
+Binary classifier
+    |
+    v
+Full-image FPN segmentation
+    |
+    v
+ROI extraction
+    |
+    v
+Crop-based FPN refinement
+    |
+    v
+Post-processing and final mask
+```
 
 ## Results
+
+The reported results are preserved from the completed experiment.
 
 | Split | Dice | IoU |
 | --- | ---: | ---: |
 | Validation | 80.17% | 73.04% |
 | Test | 79.92% | 72.82% |
 
-## Fast Review
-
-If you only want to review the finished results, open:
+Additional saved summary:
 
 ```text
-outputs_improved_strongest/final_project_summary.txt
+Best threshold: 0.6000000000000001
+Best threshold validation Dice: 0.7487
+Test average inference time: 330.19 ms/image
 ```
 
-You can also run the quick summary cell near the top of the notebook. It prints the saved summary without training or evaluating the models.
+## Technologies
 
-The full notebook run needs the dataset and trained checkpoint files. If the checkpoint files are missing, the training cells will start from scratch.
+| Category | Tools |
+| --- | --- |
+| Language | Python |
+| Deep Learning | PyTorch, TorchVision |
+| Segmentation | Segmentation Models PyTorch |
+| Computer Vision | OpenCV |
+| Augmentation | Albumentations |
+| Data Processing | NumPy, Pandas |
+| Evaluation | Scikit-learn |
+| Experiment Interface | Jupyter Notebook, Matplotlib, tqdm |
 
 ## Repository Structure
 
@@ -45,36 +91,65 @@ The full notebook run needs the dataset and trained checkpoint files. If the che
     ├── README.md
     ├── final_project_summary.txt
     ├── final_project_summary.json
-    ├── *_metrics.json
-    ├── *_history.csv
-    ├── *_summary.json
-    ├── *_per_image_results.csv
+    ├── best_threshold.json
+    ├── best_threshold.txt
+    ├── classifier_metrics.json
+    ├── segmenter_metrics.json
+    ├── refiner_metrics.json
+    ├── classifier_history.csv
+    ├── segmenter_history.csv
+    ├── refiner_history.csv
     ├── threshold_search.csv
+    ├── val_summary.json
+    ├── test_summary.json
+    ├── val_per_image_results.csv
+    ├── test_per_image_results.csv
     └── visuals/
         └── *_prediction.png
 ```
 
+## Quick Review
+
+If you only want to review the completed results, open:
+
+```text
+outputs_improved_strongest/final_project_summary.txt
+```
+
+The notebook also includes fast review cells near the top:
+
+1. `Quick saved-summary view`
+2. `Quick saved-visuals view`
+
+These cells display saved metrics and prediction images without training or re-running evaluation.
+
 ## Setup
 
-1. Install Python dependencies:
+Install the required Python dependencies:
 
-   ```bash
-   pip install -r requirements.txt
-   ```
+```bash
+pip install -r requirements.txt
+```
 
-2. Download the Severstal dataset and place it at:
+Download the Severstal dataset and place it at:
 
-   ```text
-   ~/Downloads/severstal-steel-defect-detection
-   ```
+```text
+~/Downloads/severstal-steel-defect-detection
+```
 
-   Or set a custom dataset path:
+Or set a custom dataset path:
 
-   ```bash
-   export SEVERSTAL_BASE_PATH="/path/to/severstal-steel-defect-detection"
-   ```
+```bash
+export SEVERSTAL_BASE_PATH="/path/to/severstal-steel-defect-detection"
+```
 
-3. Open `severstal_real_notebook_cells_mac_vscode.ipynb` in VS Code or Jupyter and run the cells from top to bottom.
+Open the notebook:
+
+```text
+severstal_real_notebook_cells_mac_vscode.ipynb
+```
+
+Run the cells from top to bottom for the full pipeline.
 
 ## Full Run Behavior
 
@@ -85,15 +160,50 @@ The notebook preserves the trained pipeline behavior:
 - `RESUME = True` allows interrupted training to continue from the latest checkpoint.
 - The saved threshold in `best_threshold.json` is reused when available.
 
+Checkpoint files are not tracked in Git because they are large. Store trained weights with Git LFS, a GitHub Release, Kaggle, Google Drive, or another artifact store if you want to share them.
+
 ## Outputs
 
-The notebook writes output files to `outputs_improved_strongest/`, including metrics, CSV summaries, threshold search results, visualizations, and model checkpoints.
+The notebook writes generated outputs to:
 
-Model checkpoint files (`.pth`, `.pt`, `.ckpt`) are ignored by Git because they are large. Store trained weights with Git LFS, a GitHub Release, Kaggle, Google Drive, or another artifact store if you want to share them.
+```text
+outputs_improved_strongest/
+```
+
+This folder includes:
+
+- Final project summaries
+- Per-stage metrics
+- Training history CSV files
+- Threshold search results
+- Validation and test per-image results
+- Saved prediction visualizations
+
+## Future Improvements
+
+- Add experiment configuration files for easier hyperparameter tracking.
+- Provide downloadable model checkpoints through GitHub Releases or external artifact storage.
+- Add a lightweight inference-only script for running predictions outside the notebook.
+- Add automated tests for RLE decoding, mask generation, thresholding, and post-processing utilities.
+- Compare additional encoders such as EfficientNet or ConvNeXt under the same validation protocol.
+- Package the pipeline into reusable Python modules while preserving the notebook as the experiment report.
+
+## Citation
+
+If you use this project or build on it, please cite the repository:
+
+```bibtex
+@misc{multi_stage_steel_defect_detection,
+  title = {Multi-Stage Steel Defect Detection},
+  author = {Ali},
+  year = {2026},
+  url = {https://github.com/Ali-51/multi-stage-steel-defect-detection}
+}
+```
 
 ## Notes
 
+- Dataset files are not included in this repository.
+- Model checkpoint files are not included in Git.
 - The default encoder is `resnet34`, which works well for limited VRAM.
 - For stronger experiments, try `timm-efficientnet-b3` and reduce `BATCH` if memory is tight.
-- Dataset files are not included in this repository.
-- Checkpoint files are not included in Git. Use Git LFS, a GitHub Release, Kaggle, Google Drive, or another artifact store to share trained weights.
