@@ -1,0 +1,84 @@
+{
+    "model_name": "Improved Strongest Three-Stage FPN Pipeline",
+    "encoder": "resnet34",
+    "architecture": {
+        "stage_0": "Binary classifier",
+        "stage_1": "Full-image FPN global segmentation",
+        "stage_2": "Crop FPN refiner trained on Stage 1 predicted ROIs",
+        "final_merge": "np.maximum(coarse, refined)"
+    },
+    "key_choices": [
+        "Stage 1 provides global image context and ROI selection.",
+        "Stage 2 refines Stage 1 regions instead of replacing them.",
+        "ReduceLROnPlateau reacts to validation F1/Dice.",
+        "AdamW lr=1e-4 improves stability.",
+        "Low classifier threshold reduces false negatives.",
+        "Connected component filtering removes tiny false positives.",
+        "Resume checkpoints prevent lost training after crashes."
+    ],
+    "hyperparameters": {
+        "batch_size": 6,
+        "lr": 0.0001,
+        "epochs_classifier": 10,
+        "epochs_segmenter": 40,
+        "epochs_refiner": 20,
+        "crop_size": 512,
+        "th_cls": 0.1,
+        "th_seg_initial": 0.3,
+        "th_ref": 0.3,
+        "th_roi": 0.1,
+        "roi_pad": 260,
+        "final_dilation_kernel": 5,
+        "grad_clip_norm": 1.0,
+        "use_tta_inference": true,
+        "use_tta_threshold_search": false,
+        "min_component_area": 20
+    },
+    "classifier": {
+        "stage": "classifier",
+        "loaded_from_checkpoint": "outputs_improved_strongest/checkpoints/best_cls.pth",
+        "training_skipped_this_run": true,
+        "training_time_seconds_this_run": 0.0,
+        "training_time_minutes": 0.0
+    },
+    "segmenter": {
+        "stage": "segmenter",
+        "loaded_from_checkpoint": "outputs_improved_strongest/checkpoints/best_seg.pth",
+        "training_skipped_this_run": true,
+        "training_time_seconds_this_run": 0.0,
+        "training_time_minutes": 0.0
+    },
+    "refiner": {
+        "stage": "refiner",
+        "loaded_from_checkpoint": "outputs_improved_strongest/checkpoints/best_ref.pth",
+        "training_skipped_this_run": true,
+        "training_time_seconds_this_run": 0.0,
+        "training_time_minutes": 0.0
+    },
+    "threshold_search": {
+        "best_threshold": 0.6000000000000001,
+        "best_val_dice": 0.7486956844752367,
+        "used_tta": false
+    },
+    "validation": {
+        "split": "VAL",
+        "num_images": 2514,
+        "dice": 0.8016628919005291,
+        "iou": 0.7304428599856441,
+        "total_inference_time_seconds": 816.4561852149975,
+        "avg_inference_time_seconds_per_image": 0.3247637968237858,
+        "avg_inference_time_ms_per_image": 324.7637968237858,
+        "results_csv": "outputs_improved_strongest/val_per_image_results.csv"
+    },
+    "test": {
+        "split": "TEST",
+        "num_images": 2514,
+        "dice": 0.7992072340700608,
+        "iou": 0.7282188733003847,
+        "total_inference_time_seconds": 830.1042469559939,
+        "avg_inference_time_seconds_per_image": 0.3301926201097828,
+        "avg_inference_time_ms_per_image": 330.1926201097828,
+        "results_csv": "outputs_improved_strongest/test_per_image_results.csv"
+    },
+    "total_training_time_minutes_this_run": 0.0
+}

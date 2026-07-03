@@ -1,0 +1,7 @@
+{
+    "train_crop_samples": 3995,
+    "val_crop_samples": 1333,
+    "crop_size": 512,
+    "th_roi": 0.1,
+    "roi_pad": 260
+}

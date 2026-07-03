@@ -1,0 +1,5 @@
+{
+    "best_threshold": 0.6000000000000001,
+    "best_val_dice": 0.7486956844752367,
+    "used_tta": false
+}

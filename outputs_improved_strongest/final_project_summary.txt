@@ -1,0 +1,11 @@
+Improved Strongest Three-Stage FPN Pipeline Summary
+============================================================
+Encoder: resnet34
+Best threshold: 0.6000000000000001
+Best threshold val Dice: 0.7487
+VAL Dice: 0.8017
+VAL IoU: 0.7304
+TEST Dice: 0.7992
+TEST IoU: 0.7282
+TEST avg inference time: 330.19 ms/image
+Training time this run: 0.00 min

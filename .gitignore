@@ -1,0 +1,25 @@
+.DS_Store
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+
+# Local environments
+.venv/
+venv/
+env/
+
+# Local datasets
+severstal-steel-defect-detection/
+train_images/
+test_images/
+train.csv
+sample_submission.csv
+
+# Heavy model artifacts. Use Git LFS, Releases, or external storage for these.
+*.pth
+*.pt
+*.ckpt
+outputs_improved_strongest/checkpoints/
+
+# Optional generated caches
+outputs_improved_strongest/crops/

@@ -1,0 +1,10 @@
+{
+    "split": "VAL",
+    "num_images": 2514,
+    "dice": 0.8016628919005291,
+    "iou": 0.7304428599856441,
+    "total_inference_time_seconds": 816.4561852149975,
+    "avg_inference_time_seconds_per_image": 0.3247637968237858,
+    "avg_inference_time_ms_per_image": 324.7637968237858,
+    "results_csv": "outputs_improved_strongest/val_per_image_results.csv"
+}

@@ -1,0 +1,10 @@
+{
+    "split": "TEST",
+    "num_images": 2514,
+    "dice": 0.7992072340700608,
+    "iou": 0.7282188733003847,
+    "total_inference_time_seconds": 830.1042469559939,
+    "avg_inference_time_seconds_per_image": 0.3301926201097828,
+    "avg_inference_time_ms_per_image": 330.1926201097828,
+    "results_csv": "outputs_improved_strongest/test_per_image_results.csv"
+}

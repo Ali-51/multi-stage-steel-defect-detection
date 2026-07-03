@@ -1,0 +1,8 @@
+{
+    "train": 7540,
+    "val": 2514,
+    "test": 2514,
+    "seed": 42,
+    "batch": 6,
+    "encoder": "resnet34"
+}
